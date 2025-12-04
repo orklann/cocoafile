@@ -4,20 +4,24 @@
 VALUE rb_mCocoafile;
 VALUE rb_mFile;
 
-VALUE choose_file(VALUE self);
+VALUE choose_file(VALUE self, VALUE rb_ext);
 
 RUBY_FUNC_EXPORTED void
 Init_cocoafile(void)
 {
   rb_mCocoafile = rb_define_module("Cocoafile");
   rb_mFile = rb_define_class_under(rb_mCocoafile, "File", rb_cObject);
-  rb_define_method(rb_mFile, "choose_file", choose_file, 0);
+  rb_define_method(rb_mFile, "choose_file", choose_file, 1);
 }
 
-VALUE choose_file(VALUE self) {
+VALUE choose_file(VALUE self, VALUE rb_ext) {
+  // Convert Ruby string to NSString
+  Check_Type(rb_ext, T_STRING);
+  const char *ext_cstr = StringValueCStr(rb_ext);
+  NSString *ext = [NSString stringWithUTF8String:ext_cstr];
   NSOpenPanel *panel = [NSOpenPanel openPanel];
 
-  UTType *lumioseType = [UTType typeWithFilenameExtension:@"lumiose"];
+  UTType *lumioseType = [UTType typeWithFilenameExtension:ext];
   panel.allowedContentTypes = @[lumioseType];
   panel.canChooseFiles = YES;
   panel.canChooseDirectories = NO;
